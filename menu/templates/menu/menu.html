@@ -1,0 +1,164 @@
+{% extends 'menu/base.html' %}
+
+{% block title %}Menú - Mar de Burger{% endblock %}
+
+{% block content %}
+<section class="py-5">
+    <div class="container">
+        <!-- Header -->
+        <div class="text-center mb-5">
+            <h1 class="fw-bold mb-2">Nuestro Menú</h1>
+            <p class="text-muted">Todas nuestras hamburguesas son artesanales</p>
+        </div>
+
+        <!-- Filtros por categoría -->
+        {% if categorias %}
+        <div class="mb-5">
+            <div class="d-flex flex-wrap gap-2 justify-content-center">
+                <button class="btn btn-outline-primary active" onclick="filterCategory('all')" id="btn-all">
+                    Todos
+                </button>
+                {% for categoria in categorias %}
+                <button class="btn btn-outline-primary" onclick="filterCategory('cat-{{ categoria.id }}')" id="btn-cat-{{ categoria.id }}">
+                    {{ categoria.nombre }}
+                </button>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Productos por categoría -->
+        {% if productos %}
+            {% regroup productos by categoria as productos_por_categoria %}
+            
+            {% for categoria_grupo in productos_por_categoria %}
+            <div class="mb-5 categoria-section" data-categoria="cat-{{ categoria_grupo.grouper.id }}">
+                <h2 class="mb-4 pb-2" style="border-bottom: 2px solid #e0e0e0;">
+                    {{ categoria_grupo.grouper.nombre }}
+                </h2>
+                
+                <div class="row g-4">
+                    {% for producto in categoria_grupo.list %}
+                    <div class="col-md-6 col-lg-4">
+                        <div class="card h-100 border-0 shadow-sm">
+                            {% if producto.imagen %}
+                            <img src="{{ producto.imagen.url }}" 
+                                 class="card-img-top" 
+                                 alt="{{ producto.nombre }}"
+                                 style="height: 220px; object-fit: cover;"
+                                 onerror="this.src='https://via.placeholder.com/300x220/f8f9fa/6c757d?text={{ producto.nombre }}'">
+                            {% else %}
+                            <img src="https://via.placeholder.com/300x220/f8f9fa/6c757d?text={{ producto.nombre }}" 
+                                 class="card-img-top" 
+                                 alt="{{ producto.nombre }}"
+                                 style="height: 220px; object-fit: cover;">
+                            {% endif %}
+                            
+                            <div class="card-body d-flex flex-column">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <h5 class="card-title mb-0">{{ producto.nombre }}</h5>
+                                    {% if producto.destacado %}
+                                    <span class="badge bg-warning text-dark">
+                                        <i class="bi bi-star-fill"></i>
+                                    </span>
+                                    {% endif %}
+                                </div>
+                                
+                                <p class="card-text text-muted small flex-grow-1">
+                                    {{ producto.descripcion }}
+                                </p>
+                                
+                                <div class="mt-3">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <span class="h5 mb-0 fw-bold">
+                                            ${{ producto.precio }}
+                                        </span>
+                                        <div>
+                                            <a href="{% url 'producto_detail' producto.pk %}" 
+                                               class="btn btn-outline-primary btn-sm me-1">
+                                                <i class="bi bi-eye"></i>
+                                            </a>
+                                            <button onclick="addToCart({{ producto.id }})" 
+                                                    class="btn btn-primary btn-sm">
+                                                <i class="bi bi-plus-lg"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+        <div class="text-center py-5">
+            <p class="text-muted">Todavía no hay productos disponibles.</p>
+        </div>
+        {% endif %}
+    </div>
+</section>
+
+<!-- Botón flotante del carrito -->
+<a href="{% url 'checkout' %}" 
+   class="btn btn-primary position-fixed bottom-0 end-0 m-4 rounded-circle shadow"
+   style="width: 60px; height: 60px; display: none; align-items: center; justify-content: center; z-index: 1000;"
+   id="floating-cart">
+    <i class="bi bi-bag fs-4"></i>
+    <span class="cart-badge" id="floating-cart-count">0</span>
+</a>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Filtrar productos por categoría
+    function filterCategory(category) {
+        const sections = document.querySelectorAll('.categoria-section');
+        const buttons = document.querySelectorAll('.btn-outline-primary');
+        
+        // Actualizar botones activos
+        buttons.forEach(btn => btn.classList.remove('active'));
+        
+        if (category === 'all') {
+            document.getElementById('btn-all').classList.add('active');
+            sections.forEach(section => section.style.display = 'block');
+        } else {
+            document.getElementById('btn-' + category).classList.add('active');
+            sections.forEach(section => {
+                if (section.dataset.categoria === category) {
+                    section.style.display = 'block';
+                } else {
+                    section.style.display = 'none';
+                }
+            });
+        }
+    }
+    
+    // Actualizar contador del botón flotante
+    function updateFloatingCart() {
+        const cart = getCart();
+        const count = Object.values(cart).reduce((sum, qty) => sum + qty, 0);
+        const floatingCart = document.getElementById('floating-cart');
+        const floatingCount = document.getElementById('floating-cart-count');
+        
+        if (floatingCount) {
+            floatingCount.textContent = count;
+        }
+        
+        if (floatingCart) {
+            floatingCart.style.display = count > 0 ? 'flex' : 'none';
+        }
+    }
+    
+    // Actualizar al cargar
+    document.addEventListener('DOMContentLoaded', updateFloatingCart);
+    
+    // Override addToCart para actualizar el botón flotante
+    const originalAddToCart = window.addToCart;
+    window.addToCart = function(productId) {
+        originalAddToCart(productId);
+        updateFloatingCart();
+    };
+</script>
+{% endblock %}

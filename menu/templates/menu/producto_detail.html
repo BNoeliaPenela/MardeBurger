@@ -1,0 +1,189 @@
+{% extends 'menu/base.html' %}
+
+{% block title %}{{ producto.nombre }} - Mar de Burger{% endblock %}
+
+{% block content %}
+<section class="py-5">
+    <div class="container">
+        <!-- Breadcrumb -->
+        <nav aria-label="breadcrumb" class="mb-4">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'home' %}" class="text-decoration-none">Inicio</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'menu' %}" class="text-decoration-none">Menú</a></li>
+                <li class="breadcrumb-item active">{{ producto.nombre }}</li>
+            </ol>
+        </nav>
+
+        <div class="row g-5">
+            <!-- Imagen del producto -->
+            <div class="col-lg-6">
+                <div class="card border-0 shadow-sm">
+                    {% if producto.imagen %}
+                    <img src="{{ producto.imagen.url }}" 
+                         class="card-img-top rounded" 
+                         alt="{{ producto.nombre }}"
+                         style="height: 500px; object-fit: cover;"
+                         onerror="this.src='https://via.placeholder.com/500x500/f8f9fa/6c757d?text={{ producto.nombre }}'">
+                    {% else %}
+                    <img src="https://via.placeholder.com/500x500/f8f9fa/6c757d?text={{ producto.nombre }}" 
+                         class="card-img-top rounded" 
+                         alt="{{ producto.nombre }}"
+                         style="height: 500px; object-fit: cover;">
+                    {% endif %}
+                    
+                    {% if producto.destacado %}
+                    <div class="position-absolute top-0 end-0 m-3">
+                        <span class="badge bg-warning text-dark px-3 py-2">
+                            <i class="bi bi-star-fill"></i> Destacado
+                        </span>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Información del producto -->
+            <div class="col-lg-6">
+                <div class="sticky-lg-top" style="top: 100px;">
+                    <!-- Categoría -->
+                    <div class="mb-3">
+                        <span class="badge bg-light text-dark border">{{ producto.categoria.nombre }}</span>
+                    </div>
+                    
+                    <!-- Nombre -->
+                    <h1 class="display-5 fw-bold mb-3">{{ producto.nombre }}</h1>
+
+                    <!-- Descripción -->
+                    <p class="lead text-muted mb-4">
+                        {{ producto.descripcion }}
+                    </p>
+
+                    <!-- Precio -->
+                    <div class="py-4 mb-4" style="border-top: 1px solid #e0e0e0; border-bottom: 1px solid #e0e0e0;">
+                        <div class="d-flex align-items-center justify-content-between">
+                            <span class="text-muted">Precio:</span>
+                            <span class="display-5 fw-bold">${{ producto.precio }}</span>
+                        </div>
+                    </div>
+
+                    <!-- Selector de cantidad -->
+                    <div class="mb-4">
+                        <label class="form-label fw-bold mb-3">Cantidad:</label>
+                        <div class="input-group" style="max-width: 180px;">
+                            <button class="btn btn-outline-secondary" type="button" onclick="decreaseQty()">
+                                <i class="bi bi-dash"></i>
+                            </button>
+                            <input type="number" 
+                                   id="quantity" 
+                                   class="form-control text-center" 
+                                   value="1" 
+                                   min="1" 
+                                   max="10"
+                                   readonly>
+                            <button class="btn btn-outline-secondary" type="button" onclick="increaseQty()">
+                                <i class="bi bi-plus"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Botones de acción -->
+                    <div class="d-grid gap-3 mb-4">
+                        <button onclick="addMultipleToCart({{ producto.id }})" 
+                                class="btn btn-primary btn-lg">
+                            Agregar al Carrito
+                        </button>
+                        <a href="{% url 'checkout' %}" class="btn btn-outline-primary btn-lg">
+                            Ver Carrito
+                        </a>
+                    </div>
+
+                    <!-- Información adicional -->
+                    <div class="card bg-light border-0">
+                        <div class="card-body">
+                            <h6 class="card-title mb-3 fw-bold">Información de entrega</h6>
+                            <div class="small text-muted">
+                                <p class="mb-2">
+                                    <i class="bi bi-clock me-2"></i> 
+                                    Preparación: 20-30 minutos
+                                </p>
+                                <p class="mb-2">
+                                    <i class="bi bi-truck me-2"></i> 
+                                    Delivery disponible en Miramar
+                                </p>
+                                <p class="mb-0">
+                                    <i class="bi bi-shop me-2"></i> 
+                                    Retiro en el local sin costo
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Productos relacionados -->
+        {% if producto.categoria.productos.count > 1 %}
+        <div class="mt-5 pt-5" style="border-top: 1px solid #e0e0e0;">
+            <h3 class="mb-4">También te puede gustar</h3>
+            <div class="row g-4">
+                {% for prod in producto.categoria.productos.all|slice:":3" %}
+                    {% if prod.id != producto.id %}
+                    <div class="col-md-4">
+                        <div class="card border-0 shadow-sm h-100">
+                            <img src="{{ prod.imagen.url }}" 
+                                 class="card-img-top" 
+                                 alt="{{ prod.nombre }}"
+                                 style="height: 200px; object-fit: cover;"
+                                 onerror="this.src='https://via.placeholder.com/300x200/f8f9fa/6c757d?text={{ prod.nombre }}'">
+                            <div class="card-body">
+                                <h5 class="card-title">{{ prod.nombre }}</h5>
+                                <p class="text-muted small">{{ prod.descripcion|truncatewords:10 }}</p>
+                                <div class="d-flex justify-content-between align-items-center mt-3">
+                                    <span class="h5 mb-0">${{ prod.precio }}</span>
+                                    <a href="{% url 'producto_detail' prod.pk %}" class="btn btn-outline-primary btn-sm">
+                                        Ver
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function increaseQty() {
+        const input = document.getElementById('quantity');
+        const currentValue = parseInt(input.value);
+        if (currentValue < 10) {
+            input.value = currentValue + 1;
+        }
+    }
+
+    function decreaseQty() {
+        const input = document.getElementById('quantity');
+        const currentValue = parseInt(input.value);
+        if (currentValue > 1) {
+            input.value = currentValue - 1;
+        }
+    }
+
+    function addMultipleToCart(productId) {
+        const quantity = parseInt(document.getElementById('quantity').value);
+        
+        for (let i = 0; i < quantity; i++) {
+            addToCart(productId);
+        }
+        
+        // Mensaje especial si agregó más de 1
+        if (quantity > 1) {
+            showToast(`${quantity} productos agregados al carrito`);
+        }
+    }
+</script>
+{% endblock %}

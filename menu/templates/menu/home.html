@@ -1,0 +1,124 @@
+{% extends 'menu/base.html' %}
+
+{% block title %}Inicio - Mar de Burger{% endblock %}
+
+{% block content %}
+<!-- Hero Section Minimalista -->
+<section style="background-color: #f8f9fa; padding: 5rem 0;">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6">
+                <h1 class="display-4 fw-bold mb-4" style="line-height: 1.2;">
+                    Hamburguesas artesanales en Mar del Plata
+                </h1>
+                <p class="lead mb-4" style="color: #6c757d;">
+                    Ingredientes frescos, sabor auténtico y atención personalizada.
+                </p>
+                <div class="d-flex gap-3">
+                    <a href="{% url 'menu' %}" class="btn btn-primary btn-lg">
+                        Ver Menú
+                    </a>
+                    <a href="#destacados" class="btn btn-outline-primary btn-lg">
+                        Destacados
+                    </a>
+                </div>
+            </div>
+            <div class="col-lg-6 text-center mt-5 mt-lg-0">
+                <img src="https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=600&h=400&fit=crop" 
+                     alt="Hamburguesa" 
+                     class="img-fluid rounded shadow"
+                     style="max-height: 400px; object-fit: cover; width: 100%;">
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Productos Destacados -->
+<section id="destacados" class="py-5">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="fw-bold">Nuestros Destacados</h2>
+            <p class="text-muted">Los favoritos de nuestros clientes</p>
+        </div>
+        
+        {% if destacados %}
+        <div class="row g-4">
+            {% for producto in destacados %}
+            <div class="col-md-6 col-lg-3">
+                <div class="card h-100 border-0 shadow-sm">
+                    {% if producto.imagen %}
+                    <img src="{{ producto.imagen.url }}" 
+                         class="card-img-top" 
+                         alt="{{ producto.nombre }}"
+                         onerror="this.src='https://via.placeholder.com/300x220/f8f9fa/6c757d?text={{ producto.nombre }}'">
+                    {% else %}
+                    <img src="https://via.placeholder.com/300x220/f8f9fa/6c757d?text={{ producto.nombre }}" 
+                         class="card-img-top" 
+                         alt="{{ producto.nombre }}">
+                    {% endif %}
+                    <div class="card-body d-flex flex-column">
+                        <h5 class="card-title">{{ producto.nombre }}</h5>
+                        <p class="card-text text-muted small flex-grow-1">
+                            {{ producto.descripcion|truncatewords:12 }}
+                        </p>
+                        <div class="d-flex justify-content-between align-items-center mt-3">
+                            <span class="h5 mb-0">${{ producto.precio }}</span>
+                            <button onclick="addToCart({{ producto.id }})" 
+                                    class="btn btn-primary btn-sm">
+                                Agregar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="text-center py-5">
+            <p class="text-muted">Próximamente agregaremos productos destacados</p>
+        </div>
+        {% endif %}
+        
+        <div class="text-center mt-5">
+            <a href="{% url 'menu' %}" class="btn btn-outline-primary">
+                Ver Menú Completo
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- Características -->
+<section style="background-color: #f8f9fa;">
+    <div class="container">
+        <div class="row text-center g-4">
+            <div class="col-md-4">
+                <i class="bi bi-clock display-4 mb-3" style="color: #3498db;"></i>
+                <h5>Rápido</h5>
+                <p class="text-muted">Retiro o delivery en 45 minutos</p>
+            </div>
+            <div class="col-md-4">
+                <i class="bi bi-award display-4 mb-3" style="color: #3498db;"></i>
+                <h5>Calidad</h5>
+                <p class="text-muted">Ingredientes frescos y premium</p>
+            </div>
+            <div class="col-md-4">
+                <i class="bi bi-whatsapp display-4 mb-3" style="color: #3498db;"></i>
+                <h5>Pedidos fáciles</h5>
+                <p class="text-muted">Coordiná todo por WhatsApp</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Call to Action -->
+<section class="py-5">
+    <div class="container text-center">
+        <h2 class="mb-3">¿Listo para pedir?</h2>
+        <p class="lead text-muted mb-4">Hacé tu pedido ahora</p>
+        <a href="{% url 'menu' %}" class="btn btn-primary btn-lg">
+            Ver Menú
+        </a>
+    </div>
+</section>
+{% endblock %}
+

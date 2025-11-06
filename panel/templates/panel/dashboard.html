@@ -1,0 +1,168 @@
+{% extends 'panel/base_panel.html' %}
+
+{% block title %}Dashboard - Panel{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h2 fw-bold mb-1">Dashboard</h1>
+        <p class="text-muted mb-0">Bienvenido, {{ user.username }}</p>
+    </div>
+</div>
+
+<!-- Estadísticas -->
+<div class="row g-4 mb-5">
+    <div class="col-md-3">
+        <div class="card stat-card">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <p class="text-muted mb-1 small">Total Productos</p>
+                    <h3 class="fw-bold mb-0">{{ total_productos }}</h3>
+                </div>
+                <i class="bi bi-box-seam display-4 text-primary opacity-25"></i>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="card stat-card" style="border-left-color: #28a745;">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <p class="text-muted mb-1 small">Disponibles</p>
+                    <h3 class="fw-bold mb-0">{{ productos_disponibles }}</h3>
+                </div>
+                <i class="bi bi-check-circle display-4 text-success opacity-25"></i>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="card stat-card" style="border-left-color: #ffc107;">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <p class="text-muted mb-1 small">Categorías</p>
+                    <h3 class="fw-bold mb-0">{{ total_categorias }}</h3>
+                </div>
+                <i class="bi bi-tags display-4 text-warning opacity-25"></i>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="card stat-card" style="border-left-color: #dc3545;">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <p class="text-muted mb-1 small">Total Pedidos</p>
+                    <h3 class="fw-bold mb-0">{{ total_pedidos }}</h3>
+                </div>
+                <i class="bi bi-receipt display-4 text-danger opacity-25"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Accesos rápidos -->
+<div class="row g-4 mb-5">
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title fw-bold mb-3">
+                    <i class="bi bi-box-seam me-2"></i>Productos
+                </h5>
+                <p class="card-text text-muted mb-3">Gestiona tu catálogo de productos</p>
+                <div class="d-flex gap-2">
+                    <a href="{% url 'panel_producto_list' %}" class="btn btn-outline-primary btn-sm">
+                        Ver todos
+                    </a>
+                    <a href="{% url 'panel_producto_create' %}" class="btn btn-primary btn-sm">
+                        <i class="bi bi-plus-lg"></i> Nuevo
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title fw-bold mb-3">
+                    <i class="bi bi-tags me-2"></i>Categorías
+                </h5>
+                <p class="card-text text-muted mb-3">Organiza tus productos por categorías</p>
+                <div class="d-flex gap-2">
+                    <a href="{% url 'panel_categoria_list' %}" class="btn btn-outline-primary btn-sm">
+                        Ver todas
+                    </a>
+                    <a href="{% url 'panel_categoria_create' %}" class="btn btn-primary btn-sm">
+                        <i class="bi bi-plus-lg"></i> Nueva
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title fw-bold mb-3">
+                    <i class="bi bi-receipt me-2"></i>Pedidos
+                </h5>
+                <p class="card-text text-muted mb-3">Administra los pedidos de clientes</p>
+                <div class="d-flex gap-2">
+                    <a href="{% url 'panel_pedido_list' %}" class="btn btn-outline-primary btn-sm">
+                        Ver todos
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Últimos pedidos -->
+{% if ultimos_pedidos %}
+<div class="card">
+    <div class="card-header bg-white py-3">
+        <h5 class="mb-0 fw-bold">Últimos Pedidos</h5>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>#</th>
+                        <th>Cliente</th>
+                        <th>Teléfono</th>
+                        <th>Entrega</th>
+                        <th>Total</th>
+                        <th>Fecha</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for pedido in ultimos_pedidos %}
+                    <tr>
+                        <td class="fw-bold">{{ pedido.id }}</td>
+                        <td>{{ pedido.nombre_cliente }}</td>
+                        <td>{{ pedido.telefono }}</td>
+                        <td>
+                            {% if pedido.tipo_entrega == 'retiro' %}
+                                <span class="badge bg-primary">Retiro</span>
+                            {% else %}
+                                <span class="badge bg-info">Delivery</span>
+                            {% endif %}
+                        </td>
+                        <td class="fw-bold">${{ pedido.total }}</td>
+                        <td class="text-muted small">{{ pedido.fecha|date:"d/m/Y H:i" }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="card-footer bg-white text-center py-3">
+        <a href="{% url 'panel_pedido_list' %}" class="text-decoration-none">
+            Ver todos los pedidos <i class="bi bi-arrow-right"></i>
+        </a>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

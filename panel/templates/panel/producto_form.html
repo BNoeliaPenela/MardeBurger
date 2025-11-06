@@ -1,0 +1,188 @@
+{% extends 'panel/base_panel.html' %}
+
+{% block title %}{% if object %}Editar{% else %}Nuevo{% endif %} Producto - Panel{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'panel_dashboard' %}">Dashboard</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'panel_producto_list' %}">Productos</a></li>
+            <li class="breadcrumb-item active">{% if object %}Editar{% else %}Nuevo{% endif %}</li>
+        </ol>
+    </nav>
+    <h1 class="h2 fw-bold">{% if object %}Editar Producto{% else %}Nuevo Producto{% endif %}</h1>
+</div>
+
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-body">
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    
+                    <div class="row">
+                        <div class="col-md-8 mb-3">
+                            <label for="id_nombre" class="form-label fw-bold">Nombre *</label>
+                            <input type="text" 
+                                   name="nombre" 
+                                   class="form-control" 
+                                   id="id_nombre" 
+                                   value="{{ form.nombre.value|default:'' }}"
+                                   placeholder="Ej: Burger Clásica"
+                                   required>
+                            {% if form.nombre.errors %}
+                                <div class="text-danger small mt-1">{{ form.nombre.errors }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-md-4 mb-3">
+                            <label for="id_precio" class="form-label fw-bold">Precio *</label>
+                            <div class="input-group">
+                                <span class="input-group-text">$</span>
+                                <input type="number" 
+                                       name="precio" 
+                                       class="form-control" 
+                                       id="id_precio" 
+                                       value="{{ form.precio.value|default:'' }}"
+                                       step="0.01"
+                                       min="0"
+                                       required>
+                            </div>
+                            {% if form.precio.errors %}
+                                <div class="text-danger small mt-1">{{ form.precio.errors }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="id_descripcion" class="form-label fw-bold">Descripción *</label>
+                        <textarea name="descripcion" 
+                                  class="form-control" 
+                                  id="id_descripcion" 
+                                  rows="3"
+                                  placeholder="Describe el producto..."
+                                  required>{{ form.descripcion.value|default:'' }}</textarea>
+                        {% if form.descripcion.errors %}
+                            <div class="text-danger small mt-1">{{ form.descripcion.errors }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="id_categoria" class="form-label fw-bold">Categoría *</label>
+                            <select name="categoria" class="form-select" id="id_categoria" required>
+                                <option value="">Selecciona una categoría</option>
+                                {% for categoria in form.categoria.field.queryset %}
+                                <option value="{{ categoria.pk }}" 
+                                        {% if form.categoria.value == categoria.pk|stringformat:"s" %}selected{% endif %}>
+                                    {{ categoria.nombre }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                            {% if form.categoria.errors %}
+                                <div class="text-danger small mt-1">{{ form.categoria.errors }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label for="id_imagen" class="form-label fw-bold">Imagen</label>
+                            <input type="file" 
+                                   name="imagen" 
+                                   class="form-control" 
+                                   id="id_imagen"
+                                   accept="image/*">
+                            {% if object.imagen %}
+                            <small class="text-muted">Actual: {{ object.imagen.name }}</small>
+                            {% endif %}
+                            {% if form.imagen.errors %}
+                                <div class="text-danger small mt-1">{{ form.imagen.errors }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <div class="form-check form-switch mb-2">
+                            <input class="form-check-input" 
+                                   type="checkbox" 
+                                   name="disponible" 
+                                   id="id_disponible"
+                                   {% if form.disponible.value %}checked{% endif %}>
+                            <label class="form-check-label fw-bold" for="id_disponible">
+                                Disponible para la venta
+                            </label>
+                        </div>
+                        
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" 
+                                   type="checkbox" 
+                                   name="destacado" 
+                                   id="id_destacado"
+                                   {% if form.destacado.value %}checked{% endif %}>
+                            <label class="form-check-label fw-bold" for="id_destacado">
+                                Mostrar como destacado
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check-lg me-2"></i>Guardar Producto
+                        </button>
+                        <a href="{% url 'panel_producto_list' %}" class="btn btn-outline-secondary">
+                            Cancelar
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Preview de la imagen -->
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-header bg-white py-3">
+                <h6 class="mb-0 fw-bold">Vista Previa</h6>
+            </div>
+            <div class="card-body">
+                {% if object.imagen %}
+                <img src="{{ object.imagen.url }}" 
+                     class="img-fluid rounded mb-3" 
+                     alt="{{ object.nombre }}"
+                     id="preview-img">
+                {% else %}
+                <div class="bg-light rounded d-flex align-items-center justify-content-center mb-3" 
+                     style="height: 200px;" id="preview-placeholder">
+                    <i class="bi bi-image text-muted display-4"></i>
+                </div>
+                <img src="" class="img-fluid rounded mb-3 d-none" id="preview-img" alt="Preview">
+                {% endif %}
+                <p class="text-muted small mb-0">La imagen se mostrará aquí cuando la selecciones</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Preview de imagen
+    document.getElementById('id_imagen').addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const preview = document.getElementById('preview-img');
+                const placeholder = document.getElementById('preview-placeholder');
+                
+                preview.src = e.target.result;
+                preview.classList.remove('d-none');
+                if (placeholder) {
+                    placeholder.classList.add('d-none');
+                }
+            }
+            reader.readAsDataURL(file);
+        }
+    });
+</script>
+{% endblock %}

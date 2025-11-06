@@ -1,0 +1,53 @@
+{% extends 'panel/base_panel.html' %}
+
+{% block title %}Eliminar Categoría - Panel{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'panel_dashboard' %}">Dashboard</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'panel_categoria_list' %}">Categorías</a></li>
+            <li class="breadcrumb-item active">Eliminar</li>
+        </ol>
+    </nav>
+    <h1 class="h2 fw-bold">Eliminar Categoría</h1>
+</div>
+
+<div class="row">
+    <div class="col-lg-6">
+        <div class="card border-danger">
+            <div class="card-body">
+                <div class="alert alert-danger d-flex align-items-center" role="alert">
+                    <i class="bi bi-exclamation-triangle-fill me-2 fs-4"></i>
+                    <div>
+                        <strong>¡Atención!</strong> Esta acción no se puede deshacer.
+                    </div>
+                </div>
+                
+                <p class="mb-3">¿Estás seguro que deseas eliminar la categoría:</p>
+                <h4 class="mb-3">{{ object.nombre }}</h4>
+                
+                {% if object.productos.count > 0 %}
+                <div class="alert alert-warning">
+                    <strong>Nota:</strong> Esta categoría tiene {{ object.productos.count }} producto(s) asociado(s). 
+                    Eliminarla también eliminará todos los productos.
+                </div>
+                {% endif %}
+                
+                <form method="post" class="mt-4">
+                    {% csrf_token %}
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-danger">
+                            <i class="bi bi-trash me-2"></i>Sí, Eliminar
+                        </button>
+                        <a href="{% url 'panel_categoria_list' %}" class="btn btn-outline-secondary">
+                            Cancelar
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
